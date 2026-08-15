@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+git clone https://github.com/flutter/flutter.git -b stable --depth 1 _flutter_sdk
+./_flutter_sdk/bin/flutter config --enable-web
+./_flutter_sdk/bin/flutter create . --platforms=web
+./_flutter_sdk/bin/flutter pub get
+./_flutter_sdk/bin/flutter build web --release
