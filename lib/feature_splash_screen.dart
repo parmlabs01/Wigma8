@@ -9,13 +9,6 @@ import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
 import 'shared_auth_provider.dart';
 
-/// Splash screen shown for exactly 3 seconds on app launch.
-///
-/// Layout (per PRD):
-/// - Center: Wigma 8 logo + wordmark
-/// - Bottom center: "from PARM" — styled subtly, the same way Meta's
-///   signature appears at the bottom of Facebook / Instagram / Threads.
-///   This signature must NOT appear anywhere else in the app.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -66,20 +59,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Wordmark logo. Swap for the real asset:
-                      // Image.asset('assets/images/wigma8_logo.png', height: 64)
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.navyGradient,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: const Icon(
-                          Icons.diamond_outlined,
-                          color: Colors.white,
-                          size: 36,
-                        ),
+                      Image.asset(
+                        'assets/images/wigma8_logo.png',
+                        height: 96,
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
@@ -102,16 +84,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
               ),
             ),
-            // Bottom-center "from PARM" signature — splash screen only.
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-              child: Text(
-                AppConstants.fromSignature,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary.withOpacity(0.6),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.2,
+              child: Opacity(
+                opacity: 0.55,
+                child: Column(
+                  children: [
+                    Text(
+                      'from',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.2,
+                          ),
                     ),
+                    const SizedBox(height: 2),
+                    Image.asset(
+                      'assets/images/parm_logo.png',
+                      height: 18,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
