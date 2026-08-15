@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Install Flutter SDK
+git clone https://github.com/flutter/flutter.git -b stable --depth 1
+export PATH="$PATH:$(pwd)/flutter/bin"
+flutter config --enable-web
+flutter doctor
+
+# Write environment variables into .env for flutter_dotenv
 cat > .env << EOF
 SUPABASE_URL=$SUPABASE_URL
 SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
