@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+            import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
@@ -14,31 +14,31 @@ class AppTheme {
     return font
         .copyWith(
           displayLarge: font.displayLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             fontSize: 40,
             height: 1.1,
             letterSpacing: -0.5,
             color: base,
           ),
           headlineLarge: font.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             fontSize: 28,
             height: 1.15,
             letterSpacing: -0.3,
             color: base,
           ),
           headlineMedium: font.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             fontSize: 22,
             color: base,
           ),
           titleLarge: font.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             fontSize: 18,
             color: base,
           ),
           titleMedium: font.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             fontSize: 16,
             color: base,
           ),
