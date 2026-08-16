@@ -5,20 +5,19 @@ import 'core_app_constants.dart';
 import 'core_app_router.dart';
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
-import 'shared_quick_action_tile.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const _quickActions = <(DesignType, IconData)>[
-    (DesignType.logo, Icons.diamond_outlined),
-    (DesignType.flyer, Icons.description_outlined),
-    (DesignType.poster, Icons.image_outlined),
-    (DesignType.social, Icons.share_outlined),
-    (DesignType.businessCard, Icons.badge_outlined),
-    (DesignType.banner, Icons.panorama_outlined),
-    (DesignType.videoThumbnail, Icons.video_camera_back_outlined),
-    (DesignType.brandKit, Icons.palette_outlined),
+  static const _quickActions = <(DesignType, IconData, String)>[
+    (DesignType.logo, Icons.auto_awesome_outlined, 'Brand marks & wordmarks'),
+    (DesignType.flyer, Icons.image_outlined, 'Posters & promos'),
+    (DesignType.poster, Icons.videocam_outlined, 'Key frames & covers'),
+    (DesignType.social, Icons.content_cut_outlined, 'Re-style a frame'),
+    (DesignType.businessCard, Icons.badge_outlined, 'Contact-ready cards'),
+    (DesignType.banner, Icons.panorama_outlined, 'Wide-format banners'),
+    (DesignType.videoThumbnail, Icons.video_camera_back_outlined, 'Eye-catching thumbnails'),
+    (DesignType.brandKit, Icons.palette_outlined, 'Full brand system'),
   ];
 
   @override
@@ -40,16 +39,17 @@ class HomeScreen extends StatelessWidget {
               ),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
+                  crossAxisCount: 2,
                   mainAxisSpacing: AppSpacing.md,
                   crossAxisSpacing: AppSpacing.md,
-                  childAspectRatio: 0.85,
+                  childAspectRatio: 0.95,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final (type, icon) = _quickActions[index];
-                    return QuickActionTile(
-                      label: type.label,
+                    final (type, icon, subtitle) = _quickActions[index];
+                    return _ActionCard(
+                      title: type.label,
+                      subtitle: subtitle,
                       icon: icon,
                       onTap: () => context.push(
                         '${AppRoutes.generatorInput}?type=${type.slug}',
@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg, AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl,
               ),
-              sliver: SliverToBoxAdapter(child: _DraftsSection()),
+              sliver: SliverToBoxAdapter(child: _DraftsRow()),
             ),
           ],
         ),
@@ -87,30 +87,35 @@ class _Header extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: () => context.push(AppRoutes.activity),
-            icon: const Icon(Icons.history_outlined),
-            tooltip: 'Activity',
-          ),
-          Text(
-            AppConstants.appName,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          TextButton(
             onPressed: () {},
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.primaryNavy,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
+            icon: const Icon(Icons.menu),
+            tooltip: 'Menu',
+          ),
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: AppColors.accent, size: 20),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                AppConstants.appName,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
+            ],
+          ),
+          IconButton(
+            onPressed: () => context.push(AppRoutes.activity),
+            icon: Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                gradient: AppColors.accentGradient,
+                shape: BoxShape.circle,
               ),
+              child: const Icon(Icons.workspace_premium_outlined,
+                  color: Colors.white, size: 18),
             ),
-            child: const Text('Upgrade'),
+            tooltip: 'Upgrade',
           ),
         ],
       ),
@@ -124,83 +129,153 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        gradient: AppColors.navyGradient,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Design Anything,\nIn One Prompt.',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  color: Colors.white,
-                  fontSize: 26,
+                  color: AppColors.textPrimary,
+                  fontSize: 30,
                 ),
+            children: [
+              const TextSpan(text: 'Design anything,\n'),
+              TextSpan(
+                text: 'in one prompt.',
+                style: TextStyle(color: AppColors.accent),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Describe your project and let AI handle the design.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.75),
-                ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ElevatedButton(
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'Pick a canvas and describe your project. Wigma 8 handles the rest.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
             onPressed: () => GoRouter.of(context).push(
               '${AppRoutes.generatorInput}?type=logo',
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primaryNavy,
+              backgroundColor: AppColors.primaryNavy,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
             ),
             child: const Text('Start Designing'),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                gradient: AppColors.accentGradient,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title.toUpperCase(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _DraftsSection extends StatelessWidget {
-  const _DraftsSection();
+class _DraftsRow extends StatelessWidget {
+  const _DraftsRow();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: AppSpacing.md),
-        // Empty state — wire to a Riverpod provider backed by
-        // Supabase (`drafts` table filtered by user_id) once available.
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
+    // Empty state — wire to a Riverpod provider backed by
+    // Supabase (`drafts` table filtered by user_id) once available.
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.folder_outlined, color: AppColors.primaryNavy),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            'Drafts',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
           ),
-          child: Column(
-            children: [
-              const Icon(Icons.drafts_outlined, color: AppColors.textSecondary, size: 32),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'No drafts yet — your recent generations will appear here.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary),
-              ),
-            ],
+          const Spacer(),
+          Text(
+            'Your saved generations',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
