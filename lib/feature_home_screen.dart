@@ -93,7 +93,10 @@ class _Header extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: AppColors.accent, size: 20),
+              Image.asset(
+                'assets/images/wigma8_logo.png',
+                height: 24,
+              ),
               const SizedBox(width: AppSpacing.xs),
               Text(
                 AppConstants.appName,
