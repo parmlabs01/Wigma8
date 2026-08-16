@@ -9,6 +9,8 @@ import 'feature_home_screen.dart';
 import 'feature_generator_input_screen.dart';
 import 'feature_generator_results_screen.dart';
 import 'feature_activity_screen.dart';
+import 'feature_upgrade_screen.dart';
+import 'feature_drafts_screen.dart';
 import 'feature_profile_screen.dart';
 import 'feature_settings_screen.dart';
 import 'shared_auth_provider.dart';
@@ -24,6 +26,8 @@ class AppRoutes {
   static const generatorInput = '/generate';
   static const generatorResults = '/generate/results';
   static const activity = '/activity';
+  static const upgrade = '/upgrade';
+  static const drafts = '/drafts';
   static const profile = '/profile';
   static const settings = '/settings';
 }
@@ -82,6 +86,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.activity,
         builder: (context, state) => const ActivityScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.upgrade,
+        builder: (context, state) => const UpgradeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.drafts,
+        builder: (context, state) => const DraftsScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
