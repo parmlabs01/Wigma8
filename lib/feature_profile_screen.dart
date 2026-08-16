@@ -53,9 +53,22 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            _ProfileTile(icon: Icons.workspace_premium_outlined, label: 'Subscription Plan', trailing: 'Free'),
-            _ProfileTile(icon: Icons.receipt_long_outlined, label: 'Billing'),
-            _ProfileTile(icon: Icons.folder_open_outlined, label: 'Saved Projects'),
+            _ProfileTile(
+              icon: Icons.workspace_premium_outlined,
+              label: 'Subscription Plan',
+              trailing: 'Free',
+              onTap: () => context.push(AppRoutes.upgrade),
+            ),
+            _ProfileTile(
+              icon: Icons.receipt_long_outlined,
+              label: 'Billing',
+              onTap: () => context.push(AppRoutes.upgrade),
+            ),
+            _ProfileTile(
+              icon: Icons.folder_open_outlined,
+              label: 'Saved Projects',
+              onTap: () => context.push(AppRoutes.drafts),
+            ),
             const SizedBox(height: AppSpacing.xl),
             OutlinedButton(
               onPressed: () async {
@@ -75,8 +88,14 @@ class _ProfileTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String? trailing;
+  final VoidCallback onTap;
 
-  const _ProfileTile({required this.icon, required this.label, this.trailing});
+  const _ProfileTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +106,7 @@ class _ProfileTile extends StatelessWidget {
       trailing: trailing != null
           ? Text(trailing!, style: const TextStyle(color: AppColors.textSecondary))
           : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
