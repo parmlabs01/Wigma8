@@ -2,25 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core_app_constants.dart';
 import 'core_app_router.dart';
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
 import 'shared_auth_provider.dart';
 import 'shared_auth_buttons.dart';
 
-class SignUpScreen extends ConsumerStatefulWidget {
-  const SignUpScreen({super.key});
+class SignInScreen extends ConsumerStatefulWidget {
+  const SignInScreen({super.key});
 
   @override
-  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
+  ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignUpScreenState extends ConsumerState<SignUpScreen> {
+class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _fullName = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _confirmPassword = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
   String? _error;
@@ -32,14 +31,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       _error = null;
     });
     try {
-      await ref.read(authControllerProvider).signUp(
-            fullName: _fullName.text.trim(),
+      await ref.read(authControllerProvider).signIn(
             email: _email.text.trim(),
             password: _password.text,
           );
       if (mounted) context.go(AppRoutes.home);
     } catch (e) {
-      setState(() => _error = 'Could not create account. Try again.');
+      setState(() => _error = 'Could not sign in. Check your credentials.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -47,43 +45,38 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   void dispose() {
-    _fullName.dispose();
     _email.dispose();
     _password.dispose();
-    _confirmPassword.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackButton()),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.xl,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Create your account',
-                    style: Theme.of(context).textTheme.headlineLarge),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Welcome back',
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Start designing in seconds with AI.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: AppColors.textSecondary),
+                  'Sign in to continue designing with ${AppConstants.appName}.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                TextFormField(
-                  controller: _fullName,
-                  decoration: const InputDecoration(hintText: 'Full Name'),
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
-                ),
-                const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
@@ -105,20 +98,20 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   validator: (v) =>
                       (v == null || v.length < 6) ? 'Minimum 6 characters' : null,
                 ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _confirmPassword,
-                  obscureText: _obscure,
-                  decoration: const InputDecoration(hintText: 'Confirm Password'),
-                  validator: (v) => (v != _password.text) ? 'Passwords do not match' : null,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push(AppRoutes.forgotPassword),
+                    child: const Text('Forgot Password'),
+                  ),
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: AppSpacing.sm),
                   Text(_error!, style: const TextStyle(color: AppColors.danger)),
+                  const SizedBox(height: AppSpacing.sm),
                 ],
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.sm),
                 PrimaryButton(
-                  label: 'Create Account',
+                  label: 'Sign In',
                   loading: _loading,
                   onPressed: _submit,
                 ),
@@ -127,7 +120,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 const SizedBox(height: AppSpacing.lg),
                 SocialAuthButton(
                   label: 'Continue with Google',
-                  icon: Icons.g_mobiledata,
+                  svgAsset: 'assets/images/google_logo.svg',
                   onPressed: () => ref.read(authControllerProvider).signInWithGoogle(),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -137,6 +130,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   onPressed: () => ref.read(authControllerProvider).signInWithApple(),
                 ),
                 const SizedBox(height: AppSpacing.xl),
+                Center(
+                  child: TextButton(
+                    onPressed: () => context.push(AppRoutes.signUp),
+                    child: const Text.rich(
+                      TextSpan(
+                        text: "Don't have an account? ",
+                        style: TextStyle(color: AppColors.textSecondary),
+                        children: [
+                          TextSpan(
+                            text: 'Create Account',
+                            style: TextStyle(
+                              color: AppColors.primaryNavy,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
