@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg, AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl,
               ),
-              sliver: SliverToBoxAdapter(child: _DraftsRow()),
+              sliver: SliverToBoxAdapter(child: _DraftsSection(context: context)),
             ),
           ],
         ),
@@ -87,9 +87,9 @@ class _Header extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => context.push(AppRoutes.activity),
             icon: const Icon(Icons.menu),
-            tooltip: 'Menu',
+            tooltip: 'Previous activity',
           ),
           Row(
             children: [
@@ -104,12 +104,12 @@ class _Header extends StatelessWidget {
             ],
           ),
           IconButton(
-            onPressed: () => context.push(AppRoutes.activity),
+            onPressed: () => context.push(AppRoutes.upgrade),
             icon: Container(
               width: 34,
               height: 34,
               decoration: const BoxDecoration(
-                gradient: AppColors.accentGradient,
+                color: AppColors.primaryNavy,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.workspace_premium_outlined,
@@ -154,24 +154,6 @@ class _Hero extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => GoRouter.of(context).push(
-              '${AppRoutes.generatorInput}?type=logo',
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryNavy,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
-            child: const Text('Start Designing'),
-          ),
-        ),
       ],
     );
   }
@@ -199,9 +181,16 @@ class _ActionCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryNavy.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +200,7 @@ class _ActionCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: const BoxDecoration(
-                gradient: AppColors.accentGradient,
+                color: AppColors.primaryNavy,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Colors.white, size: 20),
@@ -239,43 +228,70 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-class _DraftsRow extends StatelessWidget {
-  const _DraftsRow();
+class _DraftsSection extends StatelessWidget {
+  final BuildContext context;
+  const _DraftsSection({required this.context});
 
   @override
   Widget build(BuildContext context) {
     // Empty state — wire to a Riverpod provider backed by
     // Supabase (`drafts` table filtered by user_id) once available.
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.folder_outlined, color: AppColors.primaryNavy),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Drafts',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
+            TextButton(
+              onPressed: () => context.push(AppRoutes.drafts),
+              child: const Text('View all'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.border),
           ),
-          const Spacer(),
-          Text(
-            'Your saved generations',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+          child: Column(
+            children: [
+              const Icon(Icons.folder_outlined,
+                  color: AppColors.textSecondary, size: 32),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'No drafts yet — your recent generations will appear here.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => context.push(
+              '${AppRoutes.generatorInput}?type=logo',
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryNavy,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+            ),
+            child: const Text('Start Designing'),
+          ),
+        ),
+      ],
     );
   }
 }
