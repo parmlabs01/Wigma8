@@ -33,6 +33,14 @@ jobs:
       - name: Generate Android platform files
         run: flutter create . --platforms=android
 
+      - name: Install custom app icon
+        run: |
+          cp assets/images/android_icon_mdpi.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp assets/images/android_icon_hdpi.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp assets/images/android_icon_xhdpi.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp assets/images/android_icon_xxhdpi.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp assets/images/android_icon_xxxhdpi.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
       - name: Get dependencies
         run: flutter pub get
 
