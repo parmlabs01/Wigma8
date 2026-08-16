@@ -16,6 +16,7 @@ EOF
 ./_flutter_sdk/bin/flutter create . --platforms=web
 ./_flutter_sdk/bin/flutter pub get
 
+cp custom_index.html web/index.html
 cp assets/images/icon_512.png web/icons/Icon-512.png
 cp assets/images/icon_192.png web/icons/Icon-192.png
 cp assets/images/icon_512_maskable.png web/icons/Icon-maskable-512.png
