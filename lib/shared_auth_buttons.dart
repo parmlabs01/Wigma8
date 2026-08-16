@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
 
@@ -38,13 +39,15 @@ class PrimaryButton extends StatelessWidget {
 
 class SocialAuthButton extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final String? svgAsset;
   final VoidCallback onPressed;
 
   const SocialAuthButton({
     super.key,
     required this.label,
-    required this.icon,
+    this.icon,
+    this.svgAsset,
     required this.onPressed,
   });
 
@@ -53,12 +56,21 @@ class SocialAuthButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: OutlinedButton.icon(
+      child: OutlinedButton(
         onPressed: onPressed,
-        icon: Icon(icon, size: 20, color: AppColors.textPrimary),
-        label: Text(
-          label,
-          style: const TextStyle(color: AppColors.textPrimary),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (svgAsset != null)
+              SvgPicture.asset(svgAsset!, width: 20, height: 20)
+            else if (icon != null)
+              Icon(icon, size: 20, color: AppColors.textPrimary),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              label,
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+          ],
         ),
       ),
     );
