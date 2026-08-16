@@ -3,7 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -19,6 +18,17 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          STABILITY_API_KEY=${{ secrets.STABILITY_API_KEY }}
+          FLUX_API_KEY=${{ secrets.FLUX_API_KEY }}
+          EOF
 
       - name: Generate Android platform files
         run: flutter create . --platforms=android
