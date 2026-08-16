@@ -8,6 +8,12 @@ import 'shared_theme_provider.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  void _comingSoon(BuildContext context, String label) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$label — coming soon')),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
@@ -28,12 +34,28 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const Divider(),
             _SectionLabel('Preferences'),
-            const _SettingsTile(icon: Icons.language_outlined, label: 'Language'),
-            const _SettingsTile(icon: Icons.notifications_outlined, label: 'Notifications'),
+            _SettingsTile(
+              icon: Icons.language_outlined,
+              label: 'Language',
+              onTap: () => _comingSoon(context, 'Language'),
+            ),
+            _SettingsTile(
+              icon: Icons.notifications_outlined,
+              label: 'Notifications',
+              onTap: () => _comingSoon(context, 'Notifications'),
+            ),
             const Divider(),
             _SectionLabel('Account'),
-            const _SettingsTile(icon: Icons.lock_outline, label: 'Privacy'),
-            const _SettingsTile(icon: Icons.manage_accounts_outlined, label: 'Account Management'),
+            _SettingsTile(
+              icon: Icons.lock_outline,
+              label: 'Privacy',
+              onTap: () => _comingSoon(context, 'Privacy'),
+            ),
+            _SettingsTile(
+              icon: Icons.manage_accounts_outlined,
+              label: 'Account Management',
+              onTap: () => _comingSoon(context, 'Account Management'),
+            ),
           ],
         ),
       ),
@@ -62,7 +84,8 @@ class _SectionLabel extends StatelessWidget {
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _SettingsTile({required this.icon, required this.label});
+  final VoidCallback onTap;
+  const _SettingsTile({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +94,7 @@ class _SettingsTile extends StatelessWidget {
       leading: Icon(icon, color: AppColors.primaryNavy),
       title: Text(label),
       trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
