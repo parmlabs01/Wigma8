@@ -12,11 +12,14 @@ STABILITY_API_KEY=$STABILITY_API_KEY
 FLUX_API_KEY=$FLUX_API_KEY
 EOF
 
-echo "--- DEBUG: .env contents ---"
-cat .env
-echo "-----------------------------"
-
 ./_flutter_sdk/bin/flutter config --enable-web
 ./_flutter_sdk/bin/flutter create . --platforms=web
 ./_flutter_sdk/bin/flutter pub get
+
+cp assets/images/icon_512.png web/icons/Icon-512.png
+cp assets/images/icon_192.png web/icons/Icon-192.png
+cp assets/images/icon_512_maskable.png web/icons/Icon-maskable-512.png
+cp assets/images/icon_192_maskable.png web/icons/Icon-maskable-192.png
+cp assets/images/favicon.png web/favicon.png
+
 ./_flutter_sdk/bin/flutter build web --release
