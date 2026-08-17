@@ -1,4 +1,4 @@
- import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'feature_splash_screen.dart';
@@ -13,6 +13,9 @@ import 'feature_upgrade_screen.dart';
 import 'feature_drafts_screen.dart';
 import 'feature_profile_screen.dart';
 import 'feature_settings_screen.dart';
+import 'feature_language_screen.dart';
+import 'feature_privacy_screen.dart';
+import 'feature_account_management_screen.dart';
 import 'shared_auth_provider.dart';
 
 class AppRoutes {
@@ -30,6 +33,9 @@ class AppRoutes {
   static const drafts = '/drafts';
   static const profile = '/profile';
   static const settings = '/settings';
+  static const language = '/settings/language';
+  static const privacy = '/settings/privacy';
+  static const accountManagement = '/settings/account';
 
   // Routes that require a signed-in user. Home and Upgrade stay public
   // so people can browse before creating an account, matching ChatGPT's
@@ -41,6 +47,9 @@ class AppRoutes {
     drafts,
     profile,
     settings,
+    language,
+    privacy,
+    accountManagement,
   };
 
   static bool isProtected(String location) {
@@ -64,12 +73,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isAuthed = authState.valueOrNull != null;
 
-      if (onSplash) return null; // splash handles its own timed redirect
+      if (onSplash) return null;
 
       final needsAuth = AppRoutes.isProtected(state.matchedLocation);
 
       if (!isAuthed && needsAuth) {
-        // Send them to sign in, remembering where they wanted to go.
         return '${AppRoutes.signIn}?redirect=${Uri.encodeComponent(state.matchedLocation)}';
       }
       if (isAuthed && loggingIn) {
@@ -79,26 +87,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.signIn,
-        builder: (context, state) => const SignInScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.signUp,
-        builder: (context, state) => const SignUpScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
+      GoRoute(path: AppRoutes.signIn, builder: (context, state) => const SignInScreen()),
+      GoRoute(path: AppRoutes.signUp, builder: (context, state) => const SignUpScreen()),
       GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
-      ),
+      GoRoute(path: AppRoutes.home, builder: (context, state) => const HomeScreen()),
       GoRoute(
         path: AppRoutes.generatorInput,
         builder: (context, state) {
@@ -110,25 +106,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.generatorResults,
         builder: (context, state) => const GeneratorResultsScreen(),
       ),
+      GoRoute(path: AppRoutes.activity, builder: (context, state) => const ActivityScreen()),
+      GoRoute(path: AppRoutes.upgrade, builder: (context, state) => const UpgradeScreen()),
+      GoRoute(path: AppRoutes.drafts, builder: (context, state) => const DraftsScreen()),
+      GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
+      GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
+      GoRoute(path: AppRoutes.language, builder: (context, state) => const LanguageScreen()),
+      GoRoute(path: AppRoutes.privacy, builder: (context, state) => const PrivacyScreen()),
       GoRoute(
-        path: AppRoutes.activity,
-        builder: (context, state) => const ActivityScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.upgrade,
-        builder: (context, state) => const UpgradeScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.drafts,
-        builder: (context, state) => const DraftsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.settings,
-        builder: (context, state) => const SettingsScreen(),
+        path: AppRoutes.accountManagement,
+        builder: (context, state) => const AccountManagementScreen(),
       ),
     ],
   );
