@@ -1,4 +1,5 @@
- import 'package:flutter_riverpod/flutter_riverpod.dart';
+ 
+      import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'feature_splash_screen.dart';
@@ -44,7 +45,9 @@ class AppRoutes {
   };
 
   static bool isProtected(String location) {
-    return _protected.any((p) => location == p || location.startsWith('$p/') || location.startsWith('$p?'));
+    return _protected.any(
+      (p) => location == p || location.startsWith('$p/') || location.startsWith('$p?'),
+    );
   }
 }
 
@@ -70,7 +73,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         // Send them to sign in, remembering where they wanted to go.
         return '${AppRoutes.signIn}?redirect=${Uri.encodeComponent(state.matchedLocation)}';
       }
-      if (isAuthed && loggingIn) return AppRoutes.home;
+      if (isAuthed && loggingIn) {
+        final redirect = state.uri.queryParameters['redirect'];
+        return redirect != null ? Uri.decodeComponent(redirect) : AppRoutes.home;
+      }
       return null;
     },
     routes: [
@@ -127,4 +133,4 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-});     
+});
