@@ -35,7 +35,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             email: _email.text.trim(),
             password: _password.text,
           );
-      if (mounted) context.go(AppRoutes.home);
+      if (mounted) {
+        final redirect = GoRouterState.of(context).uri.queryParameters['redirect'];
+        context.go(redirect != null ? Uri.decodeComponent(redirect) : AppRoutes.home);
+      }
     } catch (e) {
       setState(() => _error = 'Could not sign in. Check your credentials.');
     } finally {
@@ -120,7 +123,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 const SizedBox(height: AppSpacing.lg),
                 SocialAuthButton(
                   label: 'Continue with Google',
-                  icon: Icons.g_mobiledata,
+                  svgAsset: 'assets/images/google_logo.svg',
                   onPressed: () => ref.read(authControllerProvider).signInWithGoogle(),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -157,4 +160,4 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       ),
     );
   }
-}
+}               
