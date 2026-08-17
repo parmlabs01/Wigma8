@@ -37,7 +37,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             email: _email.text.trim(),
             password: _password.text,
           );
-      if (mounted) context.go(AppRoutes.home);
+      if (mounted) {
+        final redirect = GoRouterState.of(context).uri.queryParameters['redirect'];
+        context.go(redirect != null ? Uri.decodeComponent(redirect) : AppRoutes.home);
+      }
     } catch (e) {
       setState(() => _error = 'Could not create account. Try again.');
     } finally {
@@ -144,4 +147,4 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       ),
     );
   }
-}
+}          
