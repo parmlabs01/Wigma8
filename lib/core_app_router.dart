@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'feature_splash_screen.dart';
@@ -30,6 +30,22 @@ class AppRoutes {
   static const drafts = '/drafts';
   static const profile = '/profile';
   static const settings = '/settings';
+
+  // Routes that require a signed-in user. Home and Upgrade stay public
+  // so people can browse before creating an account, matching ChatGPT's
+  // "try before you sign up" pattern.
+  static const _protected = {
+    generatorInput,
+    generatorResults,
+    activity,
+    drafts,
+    profile,
+    settings,
+  };
+
+  static bool isProtected(String location) {
+    return _protected.any((p) => location == p || location.startsWith('$p/') || location.startsWith('$p?'));
+  }
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -47,7 +63,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthed = authState.valueOrNull != null;
 
       if (onSplash) return null; // splash handles its own timed redirect
-      if (!isAuthed && !loggingIn) return AppRoutes.signIn;
+
+      final needsAuth = AppRoutes.isProtected(state.matchedLocation);
+
+      if (!isAuthed && needsAuth) {
+        // Send them to sign in, remembering where they wanted to go.
+        return '${AppRoutes.signIn}?redirect=${Uri.encodeComponent(state.matchedLocation)}';
+      }
       if (isAuthed && loggingIn) return AppRoutes.home;
       return null;
     },
@@ -105,4 +127,4 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-});
+});     
