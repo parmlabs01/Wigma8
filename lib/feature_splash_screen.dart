@@ -75,8 +75,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   void _navigateNext() {
     if (!mounted) return;
-    final isAuthed = ref.read(authStateProvider).valueOrNull != null;
-    context.go(isAuthed ? AppRoutes.home : AppRoutes.signIn);
+    context.go(AppRoutes.home);
   }
 
   @override
@@ -179,4 +178,4 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
   }
-}                                        
+}
