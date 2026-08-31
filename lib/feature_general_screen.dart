@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
-import 'core_app_constants.dart';
 import 'shared_settings_provider.dart';
 
 class GeneralScreen extends ConsumerWidget {
@@ -40,9 +39,9 @@ class GeneralScreen extends ConsumerWidget {
                 },
               ),
             const Divider(),
-            ListTile(
-              title: const Text('Version'),
-              trailing: Text(AppConstants.appVersion ?? '1.0.0'),
+            const ListTile(
+              title: Text('Version'),
+              trailing: Text('1.0.0'),
             ),
           ],
         ),
