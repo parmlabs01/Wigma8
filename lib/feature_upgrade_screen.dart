@@ -6,6 +6,12 @@ import 'core_app_spacing.dart';
 class UpgradeScreen extends StatelessWidget {
   const UpgradeScreen({super.key});
 
+  void _handleUpgradeTap(BuildContext context, String plan) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$plan — billing isn\'t connected yet')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +30,7 @@ class UpgradeScreen extends StatelessWidget {
               name: 'Starter',
               price: 'Free',
               features: const [
-                '8 generations / month',
+                '10 generations / day',
                 'Standard resolution',
                 'Drafts on this device',
               ],
@@ -38,9 +44,9 @@ class UpgradeScreen extends StatelessWidget {
                 'Unlimited generations',
                 'HD exports',
                 'Priority queue',
-                'No watermark',
               ],
               ctaLabel: 'GO PRO',
+              onTap: () => _handleUpgradeTap(context, 'Pro'),
             ),
             const SizedBox(height: AppSpacing.md),
             _PlanCard(
@@ -52,6 +58,7 @@ class UpgradeScreen extends StatelessWidget {
                 'Team drafts',
                 'Commercial license',
               ],
+              onTap: () => _handleUpgradeTap(context, 'Studio'),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
@@ -74,6 +81,7 @@ class _PlanCard extends StatelessWidget {
   final List<String> features;
   final bool highlighted;
   final String? ctaLabel;
+  final VoidCallback? onTap;
 
   const _PlanCard({
     required this.name,
@@ -81,11 +89,12 @@ class _PlanCard extends StatelessWidget {
     required this.features,
     this.highlighted = false,
     this.ctaLabel,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -145,7 +154,7 @@ class _PlanCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: onTap,
                 icon: const Icon(Icons.workspace_premium_outlined),
                 label: Text(ctaLabel!),
                 style: ElevatedButton.styleFrom(
@@ -161,6 +170,14 @@ class _PlanCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+
+    if (onTap == null) return card;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      onTap: onTap,
+      child: card,
     );
   }
 }
