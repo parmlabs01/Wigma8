@@ -38,7 +38,7 @@ class UpgradeScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             _PlanCard(
               name: 'Pro',
-              price: '\$9 / mo',
+              price: '\$7 / mo',
               highlighted: true,
               features: const [
                 'Unlimited generations',
@@ -51,13 +51,14 @@ class UpgradeScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             _PlanCard(
               name: 'Studio',
-              price: '\$29 / mo',
+              price: '\$12 / mo',
               features: const [
                 'Everything in Pro',
                 'Brand kits',
                 'Team drafts',
                 'Commercial license',
               ],
+              ctaLabel: 'GO STUDIO',
               onTap: () => _handleUpgradeTap(context, 'Studio'),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -158,7 +159,7 @@ class _PlanCard extends StatelessWidget {
                 icon: const Icon(Icons.workspace_premium_outlined),
                 label: Text(ctaLabel!),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
+                  backgroundColor: highlighted ? AppColors.accent : AppColors.primaryNavy,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   shape: RoundedRectangleBorder(
