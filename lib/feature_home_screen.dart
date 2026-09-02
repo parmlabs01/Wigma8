@@ -9,15 +9,24 @@ import 'core_app_spacing.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const _quickActions = <(DesignType, IconData, String)>[
-    (DesignType.logo, Icons.auto_awesome_outlined, 'Brand marks & wordmarks'),
-    (DesignType.flyer, Icons.image_outlined, 'Posters & promos'),
-    (DesignType.poster, Icons.videocam_outlined, 'Key frames & covers'),
-    (DesignType.social, Icons.content_cut_outlined, 'Re-style a frame'),
-    (DesignType.businessCard, Icons.badge_outlined, 'Contact-ready cards'),
-    (DesignType.banner, Icons.panorama_outlined, 'Wide-format banners'),
-    (DesignType.videoThumbnail, Icons.video_camera_back_outlined, 'Eye-catching thumbnails'),
-    (DesignType.brandKit, Icons.palette_outlined, 'Full brand system'),
+  // Added a 4th field: the cover image asset for each card.
+  static const _quickActions = <(DesignType, IconData, String, String)>[
+    (DesignType.logo, Icons.auto_awesome_outlined, 'Brand marks & wordmarks',
+        'assets/images/cover_logo.jpg'),
+    (DesignType.flyer, Icons.image_outlined, 'Posters & promos',
+        'assets/images/cover_flyer.jpg'),
+    (DesignType.poster, Icons.videocam_outlined, 'Key frames & covers',
+        'assets/images/cover_poster.jpg'),
+    (DesignType.social, Icons.content_cut_outlined, 'Re-style a frame',
+        'assets/images/cover_social.jpg'),
+    (DesignType.businessCard, Icons.badge_outlined, 'Contact-ready cards',
+        'assets/images/cover_business_card.jpg'),
+    (DesignType.banner, Icons.panorama_outlined, 'Wide-format banners',
+        'assets/images/cover_banner.jpg'),
+    (DesignType.videoThumbnail, Icons.video_camera_back_outlined,
+        'Eye-catching thumbnails', 'assets/images/cover_video_thumbnail.jpg'),
+    (DesignType.brandKit, Icons.palette_outlined, 'Full brand system',
+        'assets/images/cover_brand_kit.jpg'),
   ];
 
   @override
@@ -46,11 +55,13 @@ class HomeScreen extends StatelessWidget {
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final (type, icon, subtitle) = _quickActions[index];
+                    final (type, icon, subtitle, coverImage) =
+                        _quickActions[index];
                     return _ActionCard(
                       title: type.label,
                       subtitle: subtitle,
                       icon: icon,
+                      coverImage: coverImage,
                       onTap: () => context.push(
                         '${AppRoutes.generatorInput}?type=${type.slug}',
                       ),
@@ -166,12 +177,14 @@ class _ActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String coverImage;
   final VoidCallback onTap;
 
   const _ActionCard({
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.coverImage,
     required this.onTap,
   });
 
@@ -180,49 +193,70 @@ class _ActionCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryNavy.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryNavy,
-                shape: BoxShape.circle,
+            // Cover image
+            Image.asset(
+              coverImage,
+              fit: BoxFit.cover,
+            ),
+            // Gradient scrim so white text stays legible over any image
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.05),
+                    Colors.black.withOpacity(0.65),
+                  ],
+                  stops: const [0.35, 1.0],
+                ),
               ),
-              child: Icon(icon, color: Colors.white, size: 20),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title.toUpperCase(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    letterSpacing: 0.3,
+            // Icon badge + title/subtitle overlay
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryNavy,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 20),
                   ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title.toUpperCase(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              letterSpacing: 0.3,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                      ),
+                    ],
                   ),
+                ],
+              ),
             ),
           ],
         ),
