@@ -99,7 +99,7 @@ class _Header extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => context.push(AppRoutes.activity),
-            icon: const Icon(Icons.menu),
+            icon: const _MenuIcon(),
             tooltip: 'Previous activity',
           ),
           Row(
@@ -132,6 +132,55 @@ class _Header extends StatelessWidget {
             tooltip: 'Upgrade',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MenuIcon extends StatelessWidget {
+  const _MenuIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: const BoxDecoration(
+        color: AppColors.accent,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 16,
+              height: 2,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              width: 16,
+              height: 2,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              width: 4,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
