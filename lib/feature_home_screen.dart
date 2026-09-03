@@ -146,12 +146,13 @@ class _MenuIcon extends StatelessWidget {
       width: 34,
       height: 34,
       decoration: const BoxDecoration(
-        color: AppColors.accent,
+        color: Color(0xFF1B3A6B),
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 16,
