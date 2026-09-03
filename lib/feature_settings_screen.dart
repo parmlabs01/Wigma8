@@ -65,7 +65,7 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.email_outlined,
               label: 'Email',
               trailing: user?.email ?? '—',
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.changeEmail),
             ),
             const Divider(height: AppSpacing.xxl),
             _SectionLabel('Appearance'),

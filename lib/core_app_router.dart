@@ -15,6 +15,7 @@ import 'feature_profile_screen.dart';
 import 'feature_settings_screen.dart';
 import 'feature_privacy_screen.dart';
 import 'feature_account_management_screen.dart';
+import 'feature_change_email_screen.dart';
 import 'feature_personalization_screen.dart';
 import 'feature_integrations_screen.dart';
 import 'feature_team_access_screen.dart';
@@ -47,6 +48,7 @@ class AppRoutes {
   static const settings = '/settings';
   static const privacy = '/settings/privacy';
   static const accountManagement = '/settings/account';
+  static const changeEmail = '/settings/change-email';
   static const personalization = '/settings/personalization';
   static const integrations = '/settings/integrations';
   static const workspace = '/settings/workspace';
@@ -73,6 +75,7 @@ class AppRoutes {
     settings,
     privacy,
     accountManagement,
+    changeEmail,
     personalization,
     integrations,
     workspace,
@@ -146,6 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.settings, builder: (context, state) => const SettingsScreen()),
       GoRoute(path: AppRoutes.privacy, builder: (context, state) => const PrivacyScreen()),
       GoRoute(path: AppRoutes.accountManagement, builder: (context, state) => const AccountManagementScreen()),
+      GoRoute(path: AppRoutes.changeEmail, builder: (context, state) => const ChangeEmailScreen()),
       GoRoute(path: AppRoutes.personalization, builder: (context, state) => const PersonalizationScreen()),
       GoRoute(path: AppRoutes.integrations, builder: (context, state) => const IntegrationsScreen()),
       GoRoute(path: AppRoutes.workspace, builder: (context, state) => const WorkspaceScreen()),
