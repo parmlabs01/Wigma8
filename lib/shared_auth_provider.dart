@@ -51,6 +51,16 @@ class AuthController {
     await _client.auth.resetPasswordForEmail(email);
   }
 
+  /// Requests an email change. Supabase sends a confirmation link to the
+  /// new address (and, depending on your project's auth settings, may
+  /// also send one to the old address) — the change only takes effect
+  /// once the link is followed.
+  Future<void> updateEmail(String newEmail) async {
+    await _client.auth.updateUser(
+      supa.UserAttributes(email: newEmail),
+    );
+  }
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
