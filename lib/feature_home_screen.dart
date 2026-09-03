@@ -146,7 +146,7 @@ class _MenuIcon extends StatelessWidget {
       width: 34,
       height: 34,
       decoration: const BoxDecoration(
-        color: Color(0xFF1B3A6B),
+        color: AppColors.primaryNavy,
         shape: BoxShape.circle,
       ),
       child: Center(
