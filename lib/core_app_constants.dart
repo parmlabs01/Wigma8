@@ -19,7 +19,16 @@ enum DesignType {
   businessCard('Business Card', 'business_card'),
   banner('Banner Design', 'banner'),
   videoThumbnail('Video Thumbnail', 'video_thumbnail'),
-  brandKit('Brand Kit', 'brand_kit');
+  brandKit('Brand Kit', 'brand_kit'),
+  videoCommercials('Commercials', 'video-commercials'),
+  videoEntertainment('Entertainment', 'video-entertainment'),
+  videoAnimations('Animations', 'video-animations'),
+  videoCorporate('Corporate', 'video-corporate'),
+  videoSocial('Social Media', 'video-social'),
+  videoEducational('Educational', 'video-educational'),
+  videoEvent('Event', 'video-event'),
+  imageEdit('Edit Image', 'image-edit'),
+  videoEdit('Edit Video', 'video-edit');
 
   final String label;
   final String slug;
