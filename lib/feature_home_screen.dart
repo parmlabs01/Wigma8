@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   _HomeSubTab _subTab = _HomeSubTab.create;
   bool _forward = true;
 
-  // ---- Image / Create (unchanged — your existing cover cards) ----
+  // ---- Image / Create (your existing cover cards) ----
   static const _imageCreateRaw =
       <(DesignType, IconData, String, String)>[
     (DesignType.logo, Icons.auto_awesome_outlined, 'Brand marks & wordmarks',
@@ -69,9 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
       .toList();
 
   // ---- Video / Create (your categories) ----
-  // NOTE: these routeType strings don't map to a DesignType yet — see the
-  // chat note about extending core_app_constants.dart / the generator
-  // input screen so these stop falling back to "logo".
   static const _videoCreate = <_Category>[
     _Category(
       title: 'Commercials',
@@ -669,4 +666,222 @@ class _CoverActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final String coverIma
+  final String coverImage;
+  final VoidCallback onTap;
+
+  const _CoverActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.coverImage,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              coverImage,
+              fit: BoxFit.cover,
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.05),
+                    Colors.black.withOpacity(0.65),
+                  ],
+                  stops: const [0.35, 1.0],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryNavy,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 20),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title.toUpperCase(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              letterSpacing: 0.3,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlainActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _PlainActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryNavy.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryNavy,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title.toUpperCase(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DraftsSection extends StatelessWidget {
+  final BuildContext context;
+  const _DraftsSection({required this.context});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
+            TextButton(
+              onPressed: () => context.push(AppRoutes.drafts),
+              child: const Text('View all'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.folder_outlined,
+                  color: AppColors.textSecondary, size: 32),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'No drafts yet — your recent generations will appear here.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => context.push(
+              '${AppRoutes.generatorInput}?type=logo',
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryNavy,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+            ),
+            child: const Text('Start Designing'),
+          ),
+        ),
+      ],
+    );
+  }
+}
