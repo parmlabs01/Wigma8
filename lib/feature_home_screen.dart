@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   _HomeSubTab _subTab = _HomeSubTab.create;
   bool _forward = true;
 
-  // ---- Image / Create (unchanged from before — your existing cover cards) ----
+  // ---- Image / Create (unchanged — your existing cover cards) ----
   static const _imageCreateRaw =
       <(DesignType, IconData, String, String)>[
     (DesignType.logo, Icons.auto_awesome_outlined, 'Brand marks & wordmarks',
@@ -68,47 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ))
       .toList();
 
-  // ---- Image / Edit (placeholder categories — rename as you like) ----
-  static const _imageEdit = <_Category>[
-    _Category(
-      title: 'Enhance Photo',
-      subtitle: 'Sharpen & upscale',
-      icon: Icons.auto_fix_high_outlined,
-      routeType: 'edit-enhance',
-    ),
-    _Category(
-      title: 'Remove Background',
-      subtitle: 'Clean cutouts',
-      icon: Icons.layers_clear_outlined,
-      routeType: 'edit-remove-bg',
-    ),
-    _Category(
-      title: 'Resize & Crop',
-      subtitle: 'Fit any format',
-      icon: Icons.crop_outlined,
-      routeType: 'edit-resize',
-    ),
-    _Category(
-      title: 'Style Transfer',
-      subtitle: 'Apply a new look',
-      icon: Icons.brush_outlined,
-      routeType: 'edit-style-transfer',
-    ),
-    _Category(
-      title: 'Color Correct',
-      subtitle: 'Balance & grade',
-      icon: Icons.tune_outlined,
-      routeType: 'edit-color-correct',
-    ),
-    _Category(
-      title: 'Retouch',
-      subtitle: 'Polish details',
-      icon: Icons.face_retouching_natural_outlined,
-      routeType: 'edit-retouch',
-    ),
-  ];
-
   // ---- Video / Create (your categories) ----
+  // NOTE: these routeType strings don't map to a DesignType yet — see the
+  // chat note about extending core_app_constants.dart / the generator
+  // input screen so these stop falling back to "logo".
   static const _videoCreate = <_Category>[
     _Category(
       title: 'Commercials',
@@ -153,54 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
       routeType: 'video-event',
     ),
   ];
-
-  // ---- Video / Edit (placeholder categories — rename as you like) ----
-  static const _videoEdit = <_Category>[
-    _Category(
-      title: 'Trim & Cut',
-      subtitle: 'Tighten your footage',
-      icon: Icons.content_cut_outlined,
-      routeType: 'video-edit-trim',
-    ),
-    _Category(
-      title: 'Add Captions',
-      subtitle: 'Auto-generate subtitles',
-      icon: Icons.subtitles_outlined,
-      routeType: 'video-edit-captions',
-    ),
-    _Category(
-      title: 'Color Grade',
-      subtitle: 'Cinematic look',
-      icon: Icons.tune_outlined,
-      routeType: 'video-edit-color-grade',
-    ),
-    _Category(
-      title: 'Combine Clips',
-      subtitle: 'Merge multiple videos',
-      icon: Icons.video_library_outlined,
-      routeType: 'video-edit-combine',
-    ),
-    _Category(
-      title: 'Add Music',
-      subtitle: 'Score your video',
-      icon: Icons.music_note_outlined,
-      routeType: 'video-edit-music',
-    ),
-    _Category(
-      title: 'Speed Ramp',
-      subtitle: 'Slow-mo & fast-forward',
-      icon: Icons.speed_outlined,
-      routeType: 'video-edit-speed',
-    ),
-  ];
-
-  List<_Category> get _activeCategories {
-    if (_mode == _HomeMode.image) {
-      return _subTab == _HomeSubTab.create ? _imageCreate : _imageEdit;
-    } else {
-      return _subTab == _HomeSubTab.create ? _videoCreate : _videoEdit;
-    }
-  }
 
   void _setMode(_HomeMode mode) {
     if (mode == _mode) return;
@@ -270,13 +185,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ).animate(animation);
                       return SlideTransition(position: offsetAnimation, child: child);
                     },
-                    child: _CategoryGrid(
-                      key: ValueKey('$_mode-$_subTab'),
-                      categories: _activeCategories,
-                      onSelect: (c) => context.push(
-                        '${AppRoutes.generatorInput}?type=${c.routeType}',
-                      ),
-                    ),
+                    child: _subTab == _HomeSubTab.create
+                        ? _CategoryGrid(
+                            key: ValueKey('create-$_mode'),
+                            categories: _mode == _HomeMode.image
+                                ? _imageCreate
+                                : _videoCreate,
+                            onSelect: (c) => context.push(
+                              '${AppRoutes.generatorInput}?type=${c.routeType}',
+                            ),
+                          )
+                        : _EditPanel(
+                            key: ValueKey('edit-$_mode'),
+                            mode: _mode,
+                          ),
                   ),
                 ),
               ),
@@ -570,6 +492,135 @@ class _Hero extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------
+// EDIT MODE — prompt box + upload, replaces the category grid entirely
+// ---------------------------------------------------------------------
+class _EditPanel extends StatefulWidget {
+  final _HomeMode mode;
+  const _EditPanel({super.key, required this.mode});
+
+  @override
+  State<_EditPanel> createState() => _EditPanelState();
+}
+
+class _EditPanelState extends State<_EditPanel> {
+  final _promptController = TextEditingController();
+  String? _fileName; // set once you wire up an actual picker
+
+  @override
+  void dispose() {
+    _promptController.dispose();
+    super.dispose();
+  }
+
+  bool get _isVideo => widget.mode == _HomeMode.video;
+
+  Future<void> _pickFile() async {
+    // TODO: wire to image_picker / file_picker.
+    // For images: ImagePicker().pickImage(source: ImageSource.gallery)
+    // For video:  ImagePicker().pickVideo(source: ImageSource.gallery)
+    // On pick, setState(() => _fileName = result.name);
+  }
+
+  void _generate() {
+    final type = _isVideo ? 'video-edit' : 'image-edit';
+    context.push(
+      '${AppRoutes.generatorInput}?type=$type&prompt=${Uri.encodeComponent(_promptController.text)}',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: _pickFile,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: DottedUploadBox(
+            icon: _isVideo ? Icons.videocam_outlined : Icons.image_outlined,
+            label: _fileName ?? (_isVideo ? 'Upload Video' : 'Upload Image'),
+            hasFile: _fileName != null,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        TextField(
+          controller: _promptController,
+          minLines: 3,
+          maxLines: 6,
+          decoration: InputDecoration(
+            hintText: _isVideo
+                ? 'Describe the edit you want — trim, captions, color grade…'
+                : 'Describe the edit you want — background, retouch, style…',
+            filled: true,
+            fillColor: AppColors.surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            contentPadding: const EdgeInsets.all(AppSpacing.md),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ElevatedButton(
+          onPressed: _generate,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryNavy,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+          ),
+          child: const Text('Generate'),
+        ),
+      ],
+    );
+  }
+}
+
+class DottedUploadBox extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool hasFile;
+
+  const DottedUploadBox({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.hasFile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: hasFile ? AppColors.primaryNavy : AppColors.border,
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: AppColors.primaryNavy, size: 28),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: hasFile ? AppColors.primaryNavy : AppColors.textSecondary,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CategoryGrid extends StatelessWidget {
   final List<_Category> categories;
   final ValueChanged<_Category> onSelect;
@@ -618,222 +669,4 @@ class _CoverActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final String coverImage;
-  final VoidCallback onTap;
-
-  const _CoverActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.coverImage,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              coverImage,
-              fit: BoxFit.cover,
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.05),
-                    Colors.black.withOpacity(0.65),
-                  ],
-                  stops: const [0.35, 1.0],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryNavy,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 20),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title.toUpperCase(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                              letterSpacing: 0.3,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.85),
-                            ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlainActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _PlainActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryNavy.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryNavy,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title.toUpperCase(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    letterSpacing: 0.3,
-                  ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DraftsSection extends StatelessWidget {
-  final BuildContext context;
-  const _DraftsSection({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
-            TextButton(
-              onPressed: () => context.push(AppRoutes.drafts),
-              child: const Text('View all'),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.folder_outlined,
-                  color: AppColors.textSecondary, size: 32),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'No drafts yet — your recent generations will appear here.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => context.push(
-              '${AppRoutes.generatorInput}?type=logo',
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryNavy,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
-            child: const Text('Start Designing'),
-          ),
-        ),
-      ],
-    );
-  }
-}
+  final String coverIma
