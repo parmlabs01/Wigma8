@@ -10,8 +10,9 @@ import 'feature_generator_design_models.dart';
 import 'feature_generator_provider.dart';
 
 /// Prompt entry screen shared by all design types (logo, flyer, poster,
-/// social, business card, banner, video thumbnail, brand kit). The
-/// design type is passed in via the `type` query param from Home.
+/// social, business card, banner, video thumbnail, brand kit, video
+/// categories, and edit modes). The design type is passed in via the
+/// `type` query param from Home.
 class GeneratorInputScreen extends ConsumerStatefulWidget {
   final String designTypeSlug;
   const GeneratorInputScreen({super.key, required this.designTypeSlug});
@@ -46,6 +47,24 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
         return 'Create a bold YouTube thumbnail for a tech review video.';
       case DesignType.brandKit:
         return 'Build a brand kit for a coffee roastery called Ember & Oak.';
+      case DesignType.videoCommercials:
+        return 'Create a 30-second commercial for a new sneaker launch.';
+      case DesignType.videoEntertainment:
+        return 'Create a short comedic sketch about a coffee shop mix-up.';
+      case DesignType.videoAnimations:
+        return 'Animate a 2D logo reveal with a bouncy, playful motion style.';
+      case DesignType.videoCorporate:
+        return 'Create a company culture video highlighting our remote team.';
+      case DesignType.videoSocial:
+        return 'Create a 15-second Reel announcing a weekend flash sale.';
+      case DesignType.videoEducational:
+        return 'Create a tutorial video explaining how compound interest works.';
+      case DesignType.videoEvent:
+        return 'Create a highlight reel for a wedding reception.';
+      case DesignType.imageEdit:
+        return 'Describe the edit — e.g. remove the background and add soft studio lighting.';
+      case DesignType.videoEdit:
+        return 'Describe the edit — e.g. trim to 30 seconds and add captions.';
     }
   }
 
