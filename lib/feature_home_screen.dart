@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'core_app_constants.dart';
 import 'core_app_router.dart';
@@ -509,7 +512,9 @@ class _EditPanel extends StatefulWidget {
 
 class _EditPanelState extends State<_EditPanel> {
   final _promptController = TextEditingController();
-  String? _fileName; // set once you wire up an actual picker
+  final _picker = ImagePicker();
+  XFile? _pickedFile;
+  Uint8List? _previewBytes;
 
   @override
   void dispose() {
@@ -520,10 +525,29 @@ class _EditPanelState extends State<_EditPanel> {
   bool get _isVideo => widget.mode == _HomeMode.video;
 
   Future<void> _pickFile() async {
-    // TODO: wire to image_picker / file_picker.
-    // For images: ImagePicker().pickImage(source: ImageSource.gallery)
-    // For video:  ImagePicker().pickVideo(source: ImageSource.gallery)
-    // On pick, setState(() => _fileName = result.name);
+    try {
+      final XFile? file = _isVideo
+          ? await _picker.pickVideo(source: ImageSource.gallery)
+          : await _picker.pickImage(source: ImageSource.gallery);
+
+      if (file == null) return; // user cancelled
+
+      Uint8List? bytes;
+      if (!_isVideo) {
+        bytes = await file.readAsBytes();
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _pickedFile = file;
+        _previewBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open picker: $e')),
+      );
+    }
   }
 
   void _generate() {
@@ -531,6 +555,10 @@ class _EditPanelState extends State<_EditPanel> {
     context.push(
       '${AppRoutes.generatorInput}?type=$type&prompt=${Uri.encodeComponent(_promptController.text)}',
     );
+    // NOTE: _pickedFile currently isn't forwarded to the generator route —
+    // once you're ready to send it to your backend, read its bytes with
+    // `await _pickedFile!.readAsBytes()` (or pass the XFile itself if the
+    // next screen can accept it) and attach it to your DesignRequest.
   }
 
   @override
@@ -543,8 +571,9 @@ class _EditPanelState extends State<_EditPanel> {
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: DottedUploadBox(
             icon: _isVideo ? Icons.videocam_outlined : Icons.image_outlined,
-            label: _fileName ?? (_isVideo ? 'Upload Video' : 'Upload Image'),
-            hasFile: _fileName != null,
+            label: _pickedFile?.name ?? (_isVideo ? 'Upload Video' : 'Upload Image'),
+            hasFile: _pickedFile != null,
+            previewBytes: _previewBytes,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -587,12 +616,14 @@ class DottedUploadBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool hasFile;
+  final Uint8List? previewBytes;
 
   const DottedUploadBox({
     super.key,
     required this.icon,
     required this.label,
     required this.hasFile,
+    this.previewBytes,
   });
 
   @override
@@ -610,7 +641,18 @@ class DottedUploadBox extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: AppColors.primaryNavy, size: 28),
+          if (previewBytes != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              child: Image.memory(
+                previewBytes!,
+                height: 80,
+                width: 80,
+                fit: BoxFit.cover,
+              ),
+            )
+          else
+            Icon(icon, color: AppColors.primaryNavy, size: 28),
           const SizedBox(height: AppSpacing.sm),
           Text(
             label,
