@@ -9,6 +9,18 @@ import 'core_app_spacing.dart';
 import 'feature_generator_design_models.dart';
 import 'feature_generator_provider.dart';
 
+enum _AspectRatioOption {
+  square('Square 1:1', Icons.crop_square_outlined),
+  portrait('Portrait 3:4', Icons.crop_portrait_outlined),
+  story('Story 9:16', Icons.stay_current_portrait_outlined),
+  landscape('Landscape 4:3', Icons.crop_landscape_outlined),
+  widescreen('Widescreen 16:9', Icons.crop_16_9_outlined);
+
+  final String label;
+  final IconData icon;
+  const _AspectRatioOption(this.label, this.icon);
+}
+
 /// Prompt entry screen shared by all design types (logo, flyer, poster,
 /// social, business card, banner, video thumbnail, brand kit, video
 /// categories, and edit modes). The design type is passed in via the
@@ -23,6 +35,7 @@ class GeneratorInputScreen extends ConsumerStatefulWidget {
 
 class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
   final _promptController = TextEditingController();
+  _AspectRatioOption _selectedRatio = _AspectRatioOption.square;
 
   DesignType get _type => DesignType.values.firstWhere(
         (t) => t.slug == widget.designTypeSlug,
@@ -73,7 +86,11 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
     if (prompt.isEmpty) return;
 
     await ref.read(generatorProvider.notifier).generate(
-          DesignRequest(prompt: prompt, designTypeSlug: _type.slug),
+          DesignRequest(
+            prompt: prompt,
+            designTypeSlug: _type.slug,
+            aspectRatio: _selectedRatio.label,
+          ),
         );
 
     if (mounted) context.push(AppRoutes.generatorResults);
@@ -111,7 +128,9 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
                     ?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Expanded(
+              // Prompt box — fixed height instead of filling the screen.
+              SizedBox(
+                height: 160,
                 child: TextField(
                   controller: _promptController,
                   maxLines: null,
@@ -124,6 +143,32 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Size',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              SizedBox(
+                height: 44,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _AspectRatioOption.values.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final option = _AspectRatioOption.values[index];
+                    final selected = option == _selectedRatio;
+                    return _AspectRatioChip(
+                      label: option.label,
+                      icon: option.icon,
+                      selected: selected,
+                      onTap: () => setState(() => _selectedRatio = option),
+                    );
+                  },
+                ),
+              ),
+              const Spacer(),
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -144,6 +189,58 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AspectRatioChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _AspectRatioChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryNavy : AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(
+            color: selected ? AppColors.primaryNavy : AppColors.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: selected ? Colors.white : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
       ),
     );

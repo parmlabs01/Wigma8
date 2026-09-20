@@ -6,16 +6,19 @@ class DesignRequest extends Equatable {
   final String designTypeSlug;
   final String? styleHint;
   final List<String>? colorHints;
+  final String? aspectRatio;
 
   const DesignRequest({
     required this.prompt,
     required this.designTypeSlug,
     this.styleHint,
     this.colorHints,
+    this.aspectRatio,
   });
 
   @override
-  List<Object?> get props => [prompt, designTypeSlug, styleHint, colorHints];
+  List<Object?> get props =>
+      [prompt, designTypeSlug, styleHint, colorHints, aspectRatio];
 }
 
 /// A single generated design concept (one of several returned per request).
