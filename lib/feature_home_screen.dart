@@ -333,6 +333,7 @@ class _SubTabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeColor = Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -343,7 +344,7 @@ class _SubTabItem extends StatelessWidget {
             label,
             style: TextStyle(
               fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-              color: selected ? AppColors.primaryNavy : AppColors.textSecondary,
+              color: selected ? activeColor : AppColors.textSecondary,
               fontSize: 15,
             ),
           ),
@@ -352,7 +353,7 @@ class _SubTabItem extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             height: 2,
             width: 28,
-            color: selected ? AppColors.primaryNavy : Colors.transparent,
+            color: selected ? activeColor : Colors.transparent,
           ),
         ],
       ),
@@ -398,8 +399,8 @@ class _Header extends StatelessWidget {
             icon: Container(
               width: 34,
               height: 34,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryNavy,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.workspace_premium_outlined,
@@ -421,8 +422,8 @@ class _MenuIcon extends StatelessWidget {
     return Container(
       width: 34,
       height: 34,
-      decoration: const BoxDecoration(
-        color: AppColors.primaryNavy,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
         shape: BoxShape.circle,
       ),
       child: Center(
@@ -475,7 +476,6 @@ class _Hero extends StatelessWidget {
         RichText(
           text: TextSpan(
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  color: AppColors.textPrimary,
                   fontSize: 30,
                 ),
             children: [
@@ -598,7 +598,7 @@ class _EditPanelState extends State<_EditPanel> {
         ElevatedButton(
           onPressed: _generate,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryNavy,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             shape: RoundedRectangleBorder(
@@ -628,6 +628,7 @@ class DottedUploadBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeColor = Theme.of(context).colorScheme.primary;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
@@ -635,7 +636,7 @@ class DottedUploadBox extends StatelessWidget {
         color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: hasFile ? AppColors.primaryNavy : AppColors.border,
+          color: hasFile ? activeColor : AppColors.border,
           width: 1.5,
         ),
       ),
@@ -652,13 +653,13 @@ class DottedUploadBox extends StatelessWidget {
               ),
             )
           else
-            Icon(icon, color: AppColors.primaryNavy, size: 28),
+            Icon(icon, color: activeColor, size: 28),
           const SizedBox(height: AppSpacing.sm),
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: hasFile ? AppColors.primaryNavy : AppColors.textSecondary,
+                  color: hasFile ? activeColor : AppColors.textSecondary,
                 ),
           ),
         ],
@@ -920,7 +921,7 @@ class _DraftsSection extends StatelessWidget {
               '${AppRoutes.generatorInput}?type=logo',
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryNavy,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               shape: RoundedRectangleBorder(

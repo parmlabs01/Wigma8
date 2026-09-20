@@ -71,7 +71,8 @@ class SettingsScreen extends ConsumerWidget {
             _SectionLabel('Appearance'),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.brightness_6_outlined, color: AppColors.primaryNavy),
+              leading: Icon(Icons.brightness_6_outlined,
+                  color: Theme.of(context).colorScheme.primary),
               title: const Text('Appearance'),
               trailing: DropdownButton<ThemeMode>(
                 value: themeMode,
@@ -159,8 +160,11 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: iconColor ?? AppColors.primaryNavy),
-      title: Text(label, style: TextStyle(color: labelColor)),
+      leading: Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.primary),
+      title: Text(
+        label,
+        style: TextStyle(color: labelColor ?? Theme.of(context).colorScheme.onSurface),
+      ),
       trailing: trailing != null
           ? Row(
               mainAxisSize: MainAxisSize.min,
