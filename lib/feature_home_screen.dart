@@ -605,7 +605,7 @@ class _EditPanelState extends State<_EditPanel> {
               borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
-          child: const Text('Generate'),
+          child: const Text('Start Work'),
         ),
       ],
     );
