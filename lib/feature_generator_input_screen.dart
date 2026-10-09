@@ -254,7 +254,7 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
                           ),
                         )
                       : const Icon(Icons.auto_awesome, size: 20),
-                  label: Text(loading ? 'Generating…' : 'Generate with AI'),
+                  label: Text(loading ? 'Starting…' : 'Start Work'),
                 ),
               ),
             ],
