@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'core_app_constants.dart';
 import 'core_app_router.dart';
@@ -8,6 +11,7 @@ import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
 import 'feature_generator_design_models.dart';
 import 'feature_generator_provider.dart';
+import 'feature_home_screen.dart' show DottedUploadBox;
 
 enum _AspectRatioOption {
   square('Square 1:1', Icons.crop_square_outlined),
@@ -35,12 +39,55 @@ class GeneratorInputScreen extends ConsumerStatefulWidget {
 
 class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
   final _promptController = TextEditingController();
+  final _picker = ImagePicker();
   _AspectRatioOption _selectedRatio = _AspectRatioOption.square;
+  XFile? _pickedFile;
+  Uint8List? _previewBytes;
 
   DesignType get _type => DesignType.values.firstWhere(
         (t) => t.slug == widget.designTypeSlug,
         orElse: () => DesignType.logo,
       );
+
+  // Video design types want a video reference upload; everything else
+  // (including Video Thumbnail, which produces a still image) wants an
+  // image reference upload.
+  bool get _isVideoCategory => const {
+        DesignType.videoCommercials,
+        DesignType.videoEntertainment,
+        DesignType.videoAnimations,
+        DesignType.videoCorporate,
+        DesignType.videoSocial,
+        DesignType.videoEducational,
+        DesignType.videoEvent,
+        DesignType.videoEdit,
+      }.contains(_type);
+
+  Future<void> _pickReferenceFile() async {
+    try {
+      final XFile? file = _isVideoCategory
+          ? await _picker.pickVideo(source: ImageSource.gallery)
+          : await _picker.pickImage(source: ImageSource.gallery);
+
+      if (file == null) return; // user cancelled
+
+      Uint8List? bytes;
+      if (!_isVideoCategory) {
+        bytes = await file.readAsBytes();
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _pickedFile = file;
+        _previewBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open picker: $e')),
+      );
+    }
+  }
 
   String get _placeholder {
     switch (_type) {
@@ -92,6 +139,10 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
             aspectRatio: _selectedRatio.label,
           ),
         );
+    // NOTE: _pickedFile isn't forwarded yet — DesignRequest has no file
+    // field. Once you're ready to send it, add a field there (e.g.
+    // `referenceFile`) and pass `await _pickedFile?.readAsBytes()` or the
+    // XFile itself, the same gap flagged for the Edit panel's upload.
 
     if (mounted) context.push(AppRoutes.generatorResults);
   }
@@ -166,6 +217,25 @@ class _GeneratorInputScreenState extends ConsumerState<GeneratorInputScreen> {
                       onTap: () => setState(() => _selectedRatio = option),
                     );
                   },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                _isVideoCategory ? 'Reference Video (Optional)' : 'Reference Image (Optional)',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              InkWell(
+                onTap: _pickReferenceFile,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                child: DottedUploadBox(
+                  icon: _isVideoCategory ? Icons.videocam_outlined : Icons.image_outlined,
+                  label: _pickedFile?.name ??
+                      (_isVideoCategory ? 'Upload Reference Video' : 'Upload Reference Image'),
+                  hasFile: _pickedFile != null,
+                  previewBytes: _previewBytes,
                 ),
               ),
               const Spacer(),
