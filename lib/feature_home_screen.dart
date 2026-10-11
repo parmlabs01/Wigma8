@@ -164,16 +164,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Positioned.fill(
               child: Image.asset(bgTheme.assetPath, fit: BoxFit.cover),
             ),
-          if (hasBackground)
-            // Scrim so existing white/dark card surfaces stay legible
-            // over whichever background image is selected.
-            Positioned.fill(
-              child: Container(
-                color: Theme.of(context)
-                    .scaffoldBackgroundColor
-                    .withOpacity(0.85),
-              ),
-            ),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: AppSpacing.xxl),

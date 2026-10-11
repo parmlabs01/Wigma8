@@ -53,5 +53,6 @@ const List<HomeBackgroundTheme> homeBackgroundThemes = [
 /// add the `shared_preferences` package (not in pubspec.yaml yet), read
 /// the saved id on startup to pick the initial value, and write the id
 /// whenever the notifier's state changes.
-final homeBackgroundThemeProvider =
-    StateProvider<HomeBackgroundTheme>((ref) => homeBackgroundThemes.first);
+final homeBackgroundThemeProvider = StateProvider<HomeBackgroundTheme>(
+  (ref) => homeBackgroundThemes.firstWhere((t) => t.id == 'arena'),
+);
