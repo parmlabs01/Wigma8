@@ -16,6 +16,7 @@ import 'feature_settings_screen.dart';
 import 'feature_privacy_screen.dart';
 import 'feature_account_management_screen.dart';
 import 'feature_change_email_screen.dart';
+import 'feature_home_theme_screen.dart';
 import 'feature_personalization_screen.dart';
 import 'feature_integrations_screen.dart';
 import 'feature_team_access_screen.dart';
@@ -55,6 +56,7 @@ class AppRoutes {
   static const teamAccess = '/settings/team-access';
   static const contentFilters = '/settings/content-filters';
   static const accentColor = '/settings/accent-color';
+  static const homeTheme = '/settings/home-theme';
   static const general = '/settings/general';
   static const notifications = '/settings/notifications';
   static const defaultExport = '/settings/default-export';
@@ -82,6 +84,7 @@ class AppRoutes {
     teamAccess,
     contentFilters,
     accentColor,
+    homeTheme,
     general,
     notifications,
     defaultExport,
@@ -156,6 +159,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.teamAccess, builder: (context, state) => const TeamAccessScreen()),
       GoRoute(path: AppRoutes.contentFilters, builder: (context, state) => const ContentFiltersScreen()),
       GoRoute(path: AppRoutes.accentColor, builder: (context, state) => const AccentColorScreen()),
+      GoRoute(path: AppRoutes.homeTheme, builder: (context, state) => const HomeThemeScreen()),
       GoRoute(path: AppRoutes.general, builder: (context, state) => const GeneralScreen()),
       GoRoute(path: AppRoutes.notifications, builder: (context, state) => const NotificationsScreen()),
       GoRoute(path: AppRoutes.defaultExport, builder: (context, state) => const DefaultExportScreen()),

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -8,6 +9,7 @@ import 'core_app_constants.dart';
 import 'core_app_router.dart';
 import 'core_app_colors.dart';
 import 'core_app_spacing.dart';
+import 'shared_home_theme_provider.dart';
 
 enum _HomeMode { image, video }
 enum _HomeSubTab { create, edit }
@@ -28,14 +30,14 @@ class _Category {
   });
 }
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   _HomeMode _mode = _HomeMode.image;
   _HomeSubTab _subTab = _HomeSubTab.create;
   bool _forward = true;
@@ -152,72 +154,93 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bgTheme = ref.watch(homeBackgroundThemeProvider);
+    final hasBackground = bgTheme.assetPath.isNotEmpty;
+
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _Header(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
-                ),
-                child: _Hero(context: context),
+      body: Stack(
+        children: [
+          if (hasBackground)
+            Positioned.fill(
+              child: Image.asset(bgTheme.assetPath, fit: BoxFit.cover),
+            ),
+          if (hasBackground)
+            // Scrim so existing white/dark card surfaces stay legible
+            // over whichever background image is selected.
+            Positioned.fill(
+              child: Container(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.85),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
-                ),
-                child: _ModeToggle(mode: _mode, onChanged: _setMode),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
-                ),
-                child: _SubTabBar(subTab: _subTab, onChanged: _setSubTab),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              GestureDetector(
-                onHorizontalDragEnd: _handleSwipe,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    transitionBuilder: (child, animation) {
-                      final offsetAnimation = Tween<Offset>(
-                        begin: Offset(_forward ? 1 : -1, 0),
-                        end: Offset.zero,
-                      ).animate(animation);
-                      return SlideTransition(position: offsetAnimation, child: child);
-                    },
-                    child: _subTab == _HomeSubTab.create
-                        ? _CategoryGrid(
-                            key: ValueKey('create-$_mode'),
-                            categories: _mode == _HomeMode.image
-                                ? _imageCreate
-                                : _videoCreate,
-                            onSelect: (c) => context.push(
-                              '${AppRoutes.generatorInput}?type=${c.routeType}',
-                            ),
-                          )
-                        : _EditPanel(
-                            key: ValueKey('edit-$_mode'),
-                            mode: _mode,
-                          ),
+            ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _Header(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
+                    ),
+                    child: _Hero(context: context),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
+                    ),
+                    child: _ModeToggle(mode: _mode, onChanged: _setMode),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
+                    ),
+                    child: _SubTabBar(subTab: _subTab, onChanged: _setSubTab),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  GestureDetector(
+                    onHorizontalDragEnd: _handleSwipe,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        transitionBuilder: (child, animation) {
+                          final offsetAnimation = Tween<Offset>(
+                            begin: Offset(_forward ? 1 : -1, 0),
+                            end: Offset.zero,
+                          ).animate(animation);
+                          return SlideTransition(position: offsetAnimation, child: child);
+                        },
+                        child: _subTab == _HomeSubTab.create
+                            ? _CategoryGrid(
+                                key: ValueKey('create-$_mode'),
+                                categories: _mode == _HomeMode.image
+                                    ? _imageCreate
+                                    : _videoCreate,
+                                onSelect: (c) => context.push(
+                                  '${AppRoutes.generatorInput}?type=${c.routeType}',
+                                ),
+                              )
+                            : _EditPanel(
+                                key: ValueKey('edit-$_mode'),
+                                mode: _mode,
+                              ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.xxl, AppSpacing.lg, 0,
+                    ),
+                    child: _DraftsSection(context: context),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg, AppSpacing.xxl, AppSpacing.lg, 0,
-                ),
-                child: _DraftsSection(context: context),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -659,4 +682,279 @@ class DottedUploadBox extends StatelessWidget {
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: hasFile ? a
+                  color: hasFile ? activeColor : AppColors.textSecondary,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryGrid extends StatelessWidget {
+  final List<_Category> categories;
+  final ValueChanged<_Category> onSelect;
+
+  const _CategoryGrid({
+    super.key,
+    required this.categories,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        childAspectRatio: 0.95,
+      ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final c = categories[index];
+        return c.coverImage != null
+            ? _CoverActionCard(
+                title: c.title,
+                subtitle: c.subtitle,
+                icon: c.icon,
+                coverImage: c.coverImage!,
+                onTap: () => onSelect(c),
+              )
+            : _PlainActionCard(
+                title: c.title,
+                subtitle: c.subtitle,
+                icon: c.icon,
+                onTap: () => onSelect(c),
+              );
+      },
+    );
+  }
+}
+
+class _CoverActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String coverImage;
+  final VoidCallback onTap;
+
+  const _CoverActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.coverImage,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              coverImage,
+              fit: BoxFit.cover,
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.05),
+                    Colors.black.withOpacity(0.65),
+                  ],
+                  stops: const [0.35, 1.0],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryNavy,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 20),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title.toUpperCase(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              letterSpacing: 0.3,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlainActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _PlainActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryNavy.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppColors.primaryNavy,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title.toUpperCase(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DraftsSection extends StatelessWidget {
+  final BuildContext context;
+  const _DraftsSection({required this.context});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
+            TextButton(
+              onPressed: () => context.push(AppRoutes.drafts),
+              child: const Text('View all'),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.folder_outlined,
+                  color: AppColors.textSecondary, size: 32),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'No drafts yet — your recent generations will appear here.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => context.push(
+              '${AppRoutes.generatorInput}?type=logo',
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+            ),
+            child: const Text('Start Designing'),
+          ),
+        ),
+      ],
+    );
+  }
+}

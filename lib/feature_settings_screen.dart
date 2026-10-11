@@ -38,6 +38,11 @@ class SettingsScreen extends ConsumerWidget {
               label: 'Integrations',
               onTap: () => context.push(AppRoutes.integrations),
             ),
+            _Tile(
+              icon: Icons.wallpaper_outlined,
+              label: 'Home Theme',
+              onTap: () => context.push(AppRoutes.homeTheme),
+            ),
             const Divider(height: AppSpacing.xxl),
             _SectionLabel('Account'),
             _Tile(
