@@ -157,6 +157,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bgTheme = ref.watch(homeBackgroundThemeProvider);
     final hasBackground = bgTheme.assetPath.isNotEmpty;
 
+    // Text color that stays readable against whichever background image
+    // is active, independent of the app's own light/dark mode. Null means
+    // "no override" — fall back to normal theme-based colors.
+    final Color? overlayTextColor = bgTheme.overlayBrightness == null
+        ? null
+        : (bgTheme.overlayBrightness == Brightness.dark
+            ? Colors.white
+            : AppColors.textPrimary);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -170,12 +179,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _Header(),
+                  _Header(textColor: overlayTextColor),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
                     ),
-                    child: _Hero(context: context),
+                    child: _Hero(context: context, textColor: overlayTextColor),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -187,7 +196,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0,
                     ),
-                    child: _SubTabBar(subTab: _subTab, onChanged: _setSubTab),
+                    child: _SubTabBar(
+                      subTab: _subTab,
+                      onChanged: _setSubTab,
+                      activeColor: overlayTextColor,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   GestureDetector(
@@ -310,8 +323,13 @@ class _ModeSegment extends StatelessWidget {
 class _SubTabBar extends StatelessWidget {
   final _HomeSubTab subTab;
   final ValueChanged<_HomeSubTab> onChanged;
+  final Color? activeColor;
 
-  const _SubTabBar({required this.subTab, required this.onChanged});
+  const _SubTabBar({
+    required this.subTab,
+    required this.onChanged,
+    this.activeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -321,12 +339,14 @@ class _SubTabBar extends StatelessWidget {
           label: 'Create',
           selected: subTab == _HomeSubTab.create,
           onTap: () => onChanged(_HomeSubTab.create),
+          activeColor: activeColor,
         ),
         const SizedBox(width: AppSpacing.lg),
         _SubTabItem(
           label: 'Edit',
           selected: subTab == _HomeSubTab.edit,
           onTap: () => onChanged(_HomeSubTab.edit),
+          activeColor: activeColor,
         ),
       ],
     );
@@ -337,16 +357,18 @@ class _SubTabItem extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final Color? activeColor;
 
   const _SubTabItem({
     required this.label,
     required this.selected,
     required this.onTap,
+    this.activeColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = Theme.of(context).colorScheme.onSurface;
+    final resolvedActive = activeColor ?? Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -357,7 +379,7 @@ class _SubTabItem extends StatelessWidget {
             label,
             style: TextStyle(
               fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-              color: selected ? activeColor : AppColors.textSecondary,
+              color: selected ? resolvedActive : AppColors.textSecondary,
               fontSize: 15,
             ),
           ),
@@ -366,7 +388,7 @@ class _SubTabItem extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             height: 2,
             width: 28,
-            color: selected ? activeColor : Colors.transparent,
+            color: selected ? resolvedActive : Colors.transparent,
           ),
         ],
       ),
@@ -375,7 +397,8 @@ class _SubTabItem extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header();
+  final Color? textColor;
+  const _Header({this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -403,6 +426,7 @@ class _Header extends StatelessWidget {
                 AppConstants.appName,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
+                      color: textColor,
                     ),
               ),
             ],
@@ -479,7 +503,8 @@ class _MenuIcon extends StatelessWidget {
 
 class _Hero extends StatelessWidget {
   final BuildContext context;
-  const _Hero({required this.context});
+  final Color? textColor;
+  const _Hero({required this.context, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -490,6 +515,7 @@ class _Hero extends StatelessWidget {
           text: TextSpan(
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontSize: 30,
+                  color: textColor,
                 ),
             children: [
               const TextSpan(text: 'Design anything,\n'),
@@ -504,7 +530,7 @@ class _Hero extends StatelessWidget {
         Text(
           'Pick a canvas and describe your project. Wigma 8 handles the rest.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: textColor?.withOpacity(0.8) ?? AppColors.textSecondary,
               ),
         ),
       ],
@@ -613,338 +639,4 @@ class _EditPanelState extends State<_EditPanel> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
-          ),
-          child: const Text('Start Work'),
-        ),
-      ],
-    );
-  }
-}
-
-class DottedUploadBox extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool hasFile;
-  final Uint8List? previewBytes;
-
-  const DottedUploadBox({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.hasFile,
-    this.previewBytes,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final activeColor = Theme.of(context).colorScheme.primary;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: hasFile ? activeColor : AppColors.border,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        children: [
-          if (previewBytes != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              child: Image.memory(
-                previewBytes!,
-                height: 80,
-                width: 80,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            Icon(icon, color: activeColor, size: 28),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: hasFile ? activeColor : AppColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoryGrid extends StatelessWidget {
-  final List<_Category> categories;
-  final ValueChanged<_Category> onSelect;
-
-  const _CategoryGrid({
-    super.key,
-    required this.categories,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: AppSpacing.md,
-        crossAxisSpacing: AppSpacing.md,
-        childAspectRatio: 0.95,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) {
-        final c = categories[index];
-        return c.coverImage != null
-            ? _CoverActionCard(
-                title: c.title,
-                subtitle: c.subtitle,
-                icon: c.icon,
-                coverImage: c.coverImage!,
-                onTap: () => onSelect(c),
-              )
-            : _PlainActionCard(
-                title: c.title,
-                subtitle: c.subtitle,
-                icon: c.icon,
-                onTap: () => onSelect(c),
-              );
-      },
-    );
-  }
-}
-
-class _CoverActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String coverImage;
-  final VoidCallback onTap;
-
-  const _CoverActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.coverImage,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              coverImage,
-              fit: BoxFit.cover,
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.05),
-                    Colors.black.withOpacity(0.65),
-                  ],
-                  stops: const [0.35, 1.0],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryNavy,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    child: Icon(icon, color: Colors.white, size: 20),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title.toUpperCase(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                              letterSpacing: 0.3,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.85),
-                            ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlainActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _PlainActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryNavy.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryNavy,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title.toUpperCase(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    letterSpacing: 0.3,
-                  ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DraftsSection extends StatelessWidget {
-  final BuildContext context;
-  const _DraftsSection({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Drafts', style: Theme.of(context).textTheme.titleLarge),
-            TextButton(
-              onPressed: () => context.push(AppRoutes.drafts),
-              child: const Text('View all'),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.folder_outlined,
-                  color: AppColors.textSecondary, size: 32),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'No drafts yet — your recent generations will appear here.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => context.push(
-              '${AppRoutes.generatorInput}?type=logo',
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
-            child: const Text('Start Designing'),
-          ),
-        ),
-      ],
-    );
-  }
-}
+            padding: const EdgeInsets.symmetri
